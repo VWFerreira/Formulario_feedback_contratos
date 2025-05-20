@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
 
@@ -48,6 +48,24 @@ def index():
                         pass
 
     return render_template("index.html", contratos=contratos, dados=dados)
+
+# ROTA para AJAX: retorna os dados do contrato em JSON
+@app.route("/api/contrato/<contrato>")
+def api_contrato(contrato):
+    linha = df_contratos[df_contratos["CONTRATO"] == contrato]
+    if not linha.empty:
+        dados = linha.iloc[0].to_dict()
+
+        if "PRAZO FINAL CONTRATUAL" in dados:
+            try:
+                data = pd.to_datetime(dados["PRAZO FINAL CONTRATUAL"])
+                dados["PRAZO FINAL CONTRATUAL"] = data.strftime("%Y-%m-%d")
+            except:
+                pass
+
+        return jsonify(dados)
+
+    return jsonify({})  # Retorna JSON vazio se não encontrar
 
 if __name__ == "__main__":
     app.run(debug=True)
