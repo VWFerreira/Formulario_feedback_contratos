@@ -54,8 +54,8 @@
             </div>
 
             <!-- SEÇÃO 2 -->
-            <div class="section-title" onclick="toggleValores()" style="cursor:pointer;">2. Valores do Contrato <span id="toggle-icon">[-]</span></div>
-            <div id="valores-section" class="row mb-4 d-flex flex-wrap oculto" style="gap: 1rem;">
+            <div class="section-title" onclick="toggleValores(1)" style="cursor:pointer;">2. Valores do Contrato <span id="toggle-icon-1">[-]</span></div>
+            <div id="valores-section-1" class="row mb-4 d-flex flex-wrap oculto" style="gap: 1rem;">
                 {% for campo in ['VALOR DO CONTRATO', 'VALOR ADITIVO', 'VALOR CONTRATO + ADITIVOS', 'VALOR CONSUMIDO', 'SALDO DO CONTRATO PERCENTUAL', 'SALDO DO CONTRATO'] %}
                 <div class="col-md-4 mb-3">
                     <label class="form-label">{{ campo }}:</label>
@@ -110,137 +110,11 @@
     </div>
 </div>
 
-<script>
-function autoResizeTextareas(context = document) {
-    context.querySelectorAll('textarea').forEach(textarea => {
-        textarea.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-        });
-    });
-}
-
-function adicionarRelatorio() {
-    const wrapper = document.getElementById('relatorios-wrapper');
-    const original = wrapper.querySelector('form.relatorio');
-    const clone = original.cloneNode(true);
-
-    // limpa campos
-    clone.querySelectorAll('input, textarea, select').forEach(el => {
-        if (el.type !== 'file') el.value = '';
-    });
-
-    // limpa imagens
-    clone.querySelector('.preview-area').innerHTML = '';
-
-    // reconecta onchange imagem
-    clone.querySelectorAll('input[type="file"]').forEach(input => {
-        input.onchange = function () { previewImage(this); };
-    });
-
-    wrapper.appendChild(clone);
-    setTimeout(() => autoResizeTextareas(clone), 50);
-}
-
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'image-wrapper mb-3';
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'preview-image w-100';
-
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn btn-danger btn-sm mt-2';
-            btn.innerText = 'Remover imagem';
-            btn.onclick = () => wrapper.remove();
-
-            wrapper.appendChild(img);
-            wrapper.appendChild(btn);
-
-            const previewArea = input.closest('.relatorio').querySelector('.preview-area');
-            previewArea.appendChild(wrapper);
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-function adicionarRelatorio() {
-    const wrapper = document.getElementById('relatorios-wrapper');
-    const original = wrapper.querySelector('.relatorio');
-    const clone = original.cloneNode(true);
-
-    // limpa campos
-    clone.querySelectorAll('input, textarea, select').forEach(el => {
-        if (el.type !== 'file') el.value = '';
-    });
-
-    // limpa imagens
-    clone.querySelector('.preview-area').innerHTML = '';
-
-    // reconecta onchange imagem
-    clone.querySelectorAll('input[type="file"]').forEach(input => {
-        input.onchange = function () { previewImage(this); };
-    });
-
-    wrapper.appendChild(clone);
-
-    // ativa auto-expansão nos novos textareas
-    autoResizeTextareas(clone);
-}
-
-// inicializa expansão automática no carregamento
-autoResizeTextareas();
-
-document.querySelectorAll('textarea').forEach(textarea => {
-    textarea.setAttribute("style", "height:" + (textarea.scrollHeight) + "px;overflow-y:hidden;");
-    textarea.addEventListener("input", function() {
-        this.style.height = "auto";
-        this.style.height = (this.scrollHeight) + "px";
-    });
-});
-
-// Ajuste automático da altura da imagem baseado no espaço disponível
-window.addEventListener('beforeprint', () => {
-    document.querySelectorAll('.preview-image').forEach(img => {
-        const offsetTop = img.getBoundingClientRect().top;
-        const spaceLeft = window.innerHeight - offsetTop - 60;
-        img.style.maxHeight = spaceLeft + 'px';
-    });
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    const toggleSection2 = document.querySelector('.section-title:nth-of-type(2)');
-    const valoresSection = toggleSection2.nextElementSibling;
-
-    toggleSection2.style.cursor = 'pointer';
-    toggleSection2.addEventListener('click', () => {
-        valoresSection.style.display = valoresSection.style.display === 'none' ? 'flex' : 'none';
-    });
-});
-
-
-function toggleValores() {
-    const valores = document.getElementById('valores-section');
-    const icon = document.getElementById('toggle-icon');
-
-    if (valores.classList.contains('oculto')) {
-        valores.classList.remove('oculto');
-        icon.innerText = '[-]';
-    } else {
-        valores.classList.add('oculto');
-        icon.innerText = '[+]';
-    }
-}
-
-</script>
 <footer class="no-print rodape-contrato">
     <p>Setor de Contratos · GENPAC<br>By Vilmar William Ferreira · Todos os direitos reservados</p>
 </footer>
 
+<!-- Script externo -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
