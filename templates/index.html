@@ -18,7 +18,7 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Contrato:</label>
-                    <select name="CONTRATO" class="form-select" onchange="location.href='/?contrato='+this.value">
+                    <select name="CONTRATO" class="form-select" id="contrato-select">
                         <option value="">-- Selecione --</option>
                         {% for c in contratos %}
                             <option value="{{ c }}" {% if dados.CONTRATO == c %}selected{% endif %}>{{ c }}</option>
