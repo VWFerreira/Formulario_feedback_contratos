@@ -125,3 +125,16 @@ window.addEventListener('beforeprint', () => {
         img.style.maxHeight = spaceLeft + 'px';
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const contratoSelect = document.getElementById("contrato-select");
+    if (contratoSelect) {
+        contratoSelect.addEventListener("change", function () {
+            const selected = this.value;
+            const form = this.closest("form");
+            const url = new URL(window.location.href);
+            url.searchParams.set("contrato", selected);
+            window.location.href = url.toString(); // Força reload, mas você pode salvar antes se quiser
+        });
+    }
+});
+
