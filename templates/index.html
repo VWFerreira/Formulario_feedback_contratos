@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Contratos</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container mt-5">
+    <div id="relatorios-wrapper">
+        <div class="relatorio">
+            <form method="post" enctype="multipart/form-data" class="form-container">
+                <img src="{{ url_for('static', filename='topo.png') }}" class="top-image">
+
+                <!-- SEÇÃO 1 -->
+                <div class="section-title">1. Informações do Contrato</div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Contrato:</label>
+                        <select name="CONTRATO" class="form-select" onchange="location.href='/?contrato='+this.value">
+                            <option value="">-- Selecione --</option>
+                            {% for c in contratos %}
+                                <option value="{{ c }}" {% if dados.CONTRATO == c %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nº Contrato:</label>
+                        <input type="text" name="Nº CONTRATO" class="form-control" value="{{ dados['Nº CONTRATO']|default('') }}">
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Empresa:</label>
+                        <input type="text" name="EMPRESA" class="form-control" value="{{ dados['EMPRESA']|default('') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Estado:</label>
+                        <input type="text" name="ESTADO" class="form-control" value="{{ dados['ESTADO']|default('') }}">
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Prazo Final Contratual:</label>
+                        <input type="date" name="PRAZO FINAL CONTRATUAL" class="form-control" value="{{ dados['PRAZO FINAL CONTRATUAL']|default('') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Data Relatório:</label>
+                        <input type="date" name="DATA RELATÓRIO" class="form-control">
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2 -->
+                <div class="section-title" onclick="toggleValores()" style="cursor:pointer;">2. Valores do Contrato <span id="toggle-icon">[-]</span></div>
+                <div id="valores-section" class="row mb-4 d-flex flex-wrap oculto" style="gap: 1rem;">
+                    {% for campo in ['VALOR DO CONTRATO', 'VALOR ADITIVO', 'VALOR CONTRATO + ADITIVOS', 'VALOR CONSUMIDO', 'SALDO DO CONTRATO PERCENTUAL', 'SALDO DO CONTRATO'] %}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ campo }}:</label>
+                        <input type="text" name="{{ campo }}" class="form-control">
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- SEÇÃO 3 -->
+                <div class="section-title">3. Informações Complementares</div>
+                <div class="mb-3">
+                    <label class="form-label">Medição em andamento, para emitir NF?</label>
+                    <textarea name="MEDIÇÃO EM ANDAMENTO, PARA EMITIR NF?" class="form-control auto-expand" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">NF em aberto, qual a previsão de pagamento?</label>
+                    <textarea name="NF EM ABERTO, QUAL A PREVISÃO DE PAGAMENTO?" class="form-control auto-expand" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Aditivo, adequação, notificação ou comunicação diversos?</label>
+                    <textarea name="ADITIVO, ADEQUAÇÃO, NOTIFICAÇÃO OU COMUNICAÇÃO DIVERSOS?" class="form-control auto-expand" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Responsável pelo relatório:</label>
+                    <select name="RESPONSÁVEL PELO RELATÓRIO" class="form-select">
+                        <option value="">-- Selecione --</option>
+                        <option>Everton Oliveira</option>
+                        <option>Mathews Mayckell Pinheiro de Assis Vasconcelos</option>
+                        <option>Marília Bezerril Gomes</option>
+                        <option>Vilmar William Ferreira</option>
+                        <option>Rosângela Jales</option>
+                        <option>Tiago Jose Erhart</option>
+                    </select>
+                </div>
+
+
+                <!-- SEÇÃO 4 -->
+                <div class="section-title">4. Anexar Imagens ao Relatório</div>
+                <div class="mb-3">
+                    <div class="imagens-container">
+                        <input type="file" name="IMAGENS" class="form-control mb-2 no-print" onchange="previewImage(this)">
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mt-2 no-print" onclick="adicionarCampoImagem(this)">+ Adicionar outra imagem</button>
+                </div>
+                <div class="preview-area mt-4"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="text-center mt-4 no-print">
+        <button class="btn btn-primary" onclick="adicionarRelatorio()">+ Adicionar Outro Relatório</button>
+        <button class="btn btn-success" onclick="window.print()">🖨️ Imprimir ou Salvar PDF</button>
+    </div>
+</div>
+
+
+<script>
+function autoResizeTextareas(context = document) {
+    context.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+}
+
+function adicionarCampoImagem(botao) {
+    const container = botao.parentElement.querySelector('.imagens-container');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'IMAGENS';
+    input.className = 'form-control mb-2';
+    input.onchange = function () { previewImage(this); };
+    container.appendChild(input);
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'image-wrapper mb-3';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'preview-image w-100';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-danger btn-sm mt-2';
+            btn.innerText = 'Remover imagem';
+            btn.onclick = () => wrapper.remove();
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+
+            const previewArea = input.closest('.relatorio').querySelector('.preview-area');
+            previewArea.appendChild(wrapper);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function adicionarRelatorio() {
+    const wrapper = document.getElementById('relatorios-wrapper');
+    const original = wrapper.querySelector('.relatorio');
+    const clone = original.cloneNode(true);
+
+    // limpa campos
+    clone.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.type !== 'file') el.value = '';
+    });
+
+    // limpa imagens
+    clone.querySelector('.preview-area').innerHTML = '';
+
+    // reconecta onchange imagem
+    clone.querySelectorAll('input[type="file"]').forEach(input => {
+        input.onchange = function () { previewImage(this); };
+    });
+
+    wrapper.appendChild(clone);
+
+    // ativa auto-expansão nos novos textareas
+    autoResizeTextareas(clone);
+}
+
+// inicializa expansão automática no carregamento
+autoResizeTextareas();
+
+document.querySelectorAll('textarea').forEach(textarea => {
+    textarea.setAttribute("style", "height:" + (textarea.scrollHeight) + "px;overflow-y:hidden;");
+    textarea.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = (this.scrollHeight) + "px";
+    });
+});
+
+// Ajuste automático da altura da imagem baseado no espaço disponível
+window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.preview-image').forEach(img => {
+        const offsetTop = img.getBoundingClientRect().top;
+        const spaceLeft = window.innerHeight - offsetTop - 60;
+        img.style.maxHeight = spaceLeft + 'px';
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleSection2 = document.querySelector('.section-title:nth-of-type(2)');
+    const valoresSection = toggleSection2.nextElementSibling;
+
+    toggleSection2.style.cursor = 'pointer';
+    toggleSection2.addEventListener('click', () => {
+        valoresSection.style.display = valoresSection.style.display === 'none' ? 'flex' : 'none';
+    });
+});
+
+
+function toggleValores() {
+    const valores = document.getElementById('valores-section');
+    const icon = document.getElementById('toggle-icon');
+
+    if (valores.classList.contains('oculto')) {
+        valores.classList.remove('oculto');
+        icon.innerText = '[-]';
+    } else {
+        valores.classList.add('oculto');
+        icon.innerText = '[+]';
+    }
+}
+
+</script>
+<footer class="no-print rodape-contrato">
+    <p>Setor de Contratos · GENPAC<br>By Vilmar William Ferreira · Todos os direitos reservados</p>
+</footer>
+
+</body>
+</html>
